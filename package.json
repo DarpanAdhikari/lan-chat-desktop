@@ -1,0 +1,46 @@
+{
+  "name": "drp-lan-chat",
+  "version": "2.3.2",
+  "description": "P2P LAN messenger with file sharing developed by darpan adhikari https://darpanadhikari.com.np",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "dependencies": {
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "asar": true,
+    "appId": "com.localchat.app",
+    "productName": "Drp-Lan-Chat",
+    "copyright": "Copyright © 2026 Darpan Adhikari",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/**/*",
+      "src/**/*",
+      "assets/**/*",
+      "package.json"
+    ],
+    "icon": "assets/logo/logo.png",
+    "mac": {
+      "target": "dmg"
+    },
+    "win": {
+      "target": "portable",
+      "icon": "assets/logo/logo.png"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "assets/logo/logo.png"
+    }
+  }
+}

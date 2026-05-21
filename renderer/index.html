@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Drp Lan Chat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Lock Screen -->
+  <div id="lock-screen" class="lock-screen hidden">
+    <div class="lock-content">
+      <div class="lock-icon">🔒</div>
+      <h2>Drp Lan Chat Locked</h2>
+      <input type="password" id="lock-pin" placeholder="Enter PIN to unlock" maxlength="6">
+      <button id="lock-unlock-btn">Unlock</button>
+      <p id="lock-error" class="error-msg hidden">Incorrect PIN</p>
+    </div>
+  </div>
+
+  <!-- Setup Modal -->
+  <div id="setup-modal" class="modal-overlay hidden">
+    <div class="modal-box setup-modal">
+      <div class="setup-logo">💬</div>
+      <h2>Welcome to Drp Lan Chat</h2>
+      <p>Connect with people on your network</p>
+      <div class="setup-avatar-picker" id="setup-avatar-preview">
+        <span id="setup-avatar-initials">?</span>
+      </div>
+      <input type="text" id="setup-name" placeholder="Your display name" maxlength="30" autocomplete="off">
+      <div class="color-row" id="setup-color-row">
+        <span class="color-label">Theme color:</span>
+        <div class="color-swatches">
+          <div class="swatch active" data-color="#6366f1" style="background:#6366f1"></div>
+          <div class="swatch" data-color="#8b5cf6" style="background:#8b5cf6"></div>
+          <div class="swatch" data-color="#ec4899" style="background:#ec4899"></div>
+          <div class="swatch" data-color="#14b8a6" style="background:#14b8a6"></div>
+          <div class="swatch" data-color="#f59e0b" style="background:#f59e0b"></div>
+          <div class="swatch" data-color="#ef4444" style="background:#ef4444"></div>
+          <div class="swatch" data-color="#3b82f6" style="background:#3b82f6"></div>
+          <div class="swatch" data-color="#10b981" style="background:#10b981"></div>
+        </div>
+      </div>
+      <button id="setup-submit" class="primary-btn">Start Chatting →</button>
+    </div>
+  </div>
+
+  <!-- In-App Notification -->
+  <div id="in-app-notif" class="in-app-notif hidden">
+    <div class="notif-icon">💬</div>
+    <div class="notif-text">
+      <div class="notif-title"></div>
+      <div class="notif-body"></div>
+    </div>
+    <button class="notif-close">✕</button>
+  </div>
+
+  <!-- Video/Audio/Screen Call Overlay -->
+  <div id="video-call-overlay" class="video-call-overlay hidden">
+    <div class="call-remote-video-wrap">
+      <video id="remote-video" autoplay playsinline></video>
+      <div id="call-peer-name" class="call-peer-name"></div>
+      <!-- Audio-only avatar shown when no video -->
+      <div id="call-audio-avatar" class="call-audio-avatar hidden"></div>
+    </div>
+
+    <!-- Local video (bottom-right pip) -->
+    <div class="call-local-video-wrap">
+      <video id="local-video" autoplay playsinline muted></video>
+    </div>
+
+    <!-- Caption display -->
+    <div id="caption-display" class="caption-display hidden"></div>
+
+    <div class="call-status" id="call-status">Calling...</div>
+
+    <!-- Annotation panel (shown during screen share) -->
+    <div id="annotation-panel" class="annotation-panel hidden">
+      <button id="annot-pointer-btn" class="annot-btn active" title="Pointer mode">🖱️</button>
+      <button id="annot-draw-btn" class="annot-btn" title="Draw">✏️</button>
+      <input type="color" id="annot-color" value="#ff3b3b" title="Color" class="annot-color-pick">
+      <input type="range" id="annot-size" min="1" max="12" value="3" title="Brush size" class="annot-size-range">
+      <button id="annot-clear-btn" class="annot-btn" title="Clear all">🗑️</button>
+    </div>
+
+    <div class="call-controls">
+      <button class="call-btn mic-btn" id="call-mute-btn" title="Mute">🎙️</button>
+      <button class="call-btn cam-btn" id="call-cam-btn" title="Camera">📷</button>
+      <button class="call-btn share-btn" id="call-share-btn" title="Share Screen">🖥️</button>
+      <button class="call-btn caption-btn" id="call-caption-btn" title="Live Captions">CC</button>
+      <button class="call-btn end-btn" id="call-end-btn" title="End Call">📵</button>
+    </div>
+  </div>
+
+  <!-- Incoming Call -->
+  <div id="incoming-call" class="incoming-call hidden">
+    <div class="incoming-avatar" id="incoming-avatar"></div>
+    <div class="incoming-name" id="incoming-name">Someone</div>
+    <p id="incoming-type">Incoming video call</p>
+    <div class="incoming-btns">
+      <button id="incoming-accept" class="accept-call-btn">Accept</button>
+      <button id="incoming-reject" class="reject-call-btn">Decline</button>
+    </div>
+  </div>
+
+  <!-- Create Group Modal -->
+  <div id="create-group-modal" class="modal-overlay hidden">
+    <div class="modal-box">
+      <h3>Create Group</h3>
+      <input type="text" id="group-name-input" placeholder="Group name" maxlength="50">
+      <p class="modal-subtitle">Select members:</p>
+      <div id="group-member-list" class="group-member-list"></div>
+      <div class="modal-actions">
+        <button id="group-create-submit" class="primary-btn">Create</button>
+        <button class="modal-cancel" onclick="document.getElementById('create-group-modal').classList.add('hidden')">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Panel -->
+  <div id="settings-panel" class="settings-panel hidden">
+    <div class="settings-header">
+      <h2>Settings</h2>
+      <button id="settings-close" class="icon-btn">✕</button>
+    </div>
+    <div class="settings-body">
+      <section class="settings-section">
+        <h3>Profile</h3>
+        <div class="profile-edit-row">
+          <div class="avatar-edit-wrap" id="settings-avatar-wrap">
+            <div class="avatar-large" id="settings-avatar-display"></div>
+            <button class="avatar-change-btn" id="settings-change-avatar">📷</button>
+          </div>
+          <div class="profile-fields">
+            <label>Display Name</label>
+            <input type="text" id="settings-name" maxlength="30">
+            <label>Status</label>
+            <select id="settings-status">
+              <option value="Available">🟢 Available</option>
+              <option value="Busy">🔴 Busy</option>
+              <option value="Away">🟡 Away</option>
+              <option value="Do Not Disturb">⛔ Do Not Disturb</option>
+              <option value="Invisible">👻 Invisible</option>
+            </select>
+            <label>Custom Message</label>
+            <input type="text" id="settings-status-msg" placeholder="What are you up to?" maxlength="60">
+          </div>
+        </div>
+        <label>Theme Mode</label>
+        <select id="settings-theme-mode">
+          <option value="system">System</option>
+          <option value="dark">Dark</option>
+          <option value="light">Light</option>
+        </select>
+        <label>Theme Color</label>
+        <div class="color-swatches settings-swatches" id="settings-color-swatches">
+          <div class="swatch" data-color="#6366f1" style="background:#6366f1"></div>
+          <div class="swatch" data-color="#8b5cf6" style="background:#8b5cf6"></div>
+          <div class="swatch" data-color="#ec4899" style="background:#ec4899"></div>
+          <div class="swatch" data-color="#14b8a6" style="background:#14b8a6"></div>
+          <div class="swatch" data-color="#f59e0b" style="background:#f59e0b"></div>
+          <div class="swatch" data-color="#ef4444" style="background:#ef4444"></div>
+          <div class="swatch" data-color="#3b82f6" style="background:#3b82f6"></div>
+          <div class="swatch" data-color="#10b981" style="background:#10b981"></div>
+        </div>
+        <button class="primary-btn" id="settings-save-profile">Save Profile</button>
+      </section>
+
+      <section class="settings-section">
+        <h3>Network</h3>
+        <div class="info-row"><span>Your ID</span><code id="settings-my-id"></code></div>
+        <div class="info-row"><span>Network Peers</span><span id="settings-peer-count">0</span></div>
+        <div id="settings-network-list" class="settings-network-list"></div>
+      </section>
+
+      <section class="settings-section">
+        <h3>Notifications</h3>
+        <div class="toggle-row">
+          <span>Desktop Notifications</span>
+          <label class="toggle"><input type="checkbox" id="settings-desktop-notif"><span class="toggle-track"></span></label>
+        </div>
+        <div class="toggle-row">
+          <span>In-App Notifications <small style="opacity:0.5">(always on)</small></span>
+          <label class="toggle"><input type="checkbox" id="settings-inapp-notif" checked disabled><span class="toggle-track"></span></label>
+        </div>
+        <div class="toggle-row">
+          <span>Sound</span>
+          <label class="toggle"><input type="checkbox" id="settings-sound"><span class="toggle-track"></span></label>
+        </div>
+      </section>
+
+      <section class="settings-section">
+        <h3>Security</h3>
+        <label>Lock Screen PIN (leave blank to disable)</label>
+        <input type="password" id="settings-pin" placeholder="Set PIN (4-6 digits)" maxlength="6">
+        <button class="primary-btn" id="settings-save-pin">Set PIN</button>
+        <button class="secondary-btn" id="settings-lock-now">🔒 Lock Now</button>
+      </section>
+
+      <section class="settings-section">
+        <h3>About</h3>
+        <p class="about-text">Drp Lan Chat — P2P LAN messenger.<br>No servers, no internet required.<br>Messages queue offline and deliver when both peers are online.</p>
+        <p class="copyright-text">
+          © <span id="copyright-year"></span>
+          <a href="https://darpanadhikari.com.np" target="_blank">
+            Darpan Adhikari
+          </a>
+        </p>
+      </section>
+    </div>
+  </div>
+
+  <!-- Main App -->
+  <div class="app" id="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-top">
+        <div class="app-brand">
+          <span class="brand-icon">💬</span>
+          <span class="brand-name">Drp Lan Chat</span>
+        </div>
+        <div class="titlebar-controls">
+          <button class="tbar-btn" id="btn-minimize">─</button>
+          <button class="tbar-btn" id="btn-maximize">□</button>
+          <button class="tbar-btn close" id="btn-close">✕</button>
+        </div>
+      </div>
+
+      <div class="my-profile" id="my-profile">
+        <div class="my-avatar" id="my-avatar"></div>
+        <div class="my-info">
+          <div class="my-name" id="my-name">Loading...</div>
+          <div class="my-status" id="my-status">Available</div>
+        </div>
+        <button class="icon-btn" id="open-settings" title="Settings">⚙️</button>
+      </div>
+
+      <div class="search-wrap">
+        <input type="text" id="search-input" placeholder="🔍  Search chats...">
+      </div>
+
+      <div class="tab-bar">
+        <button class="tab active" data-tab="chats">Chats</button>
+        <button class="tab" data-tab="groups">Groups</button>
+        <button class="tab" data-tab="nearby">Nearby</button>
+        <button class="tab" data-tab="requests"><span id="req-badge" class="badge hidden">0</span>Requests</button>
+      </div>
+
+      <div class="list-wrap">
+        <div id="chats-list" class="list active"></div>
+        <div id="groups-list" class="list"></div>
+        <div id="nearby-list" class="list"></div>
+        <div id="requests-list" class="list"></div>
+      </div>
+
+      <div class="sidebar-footer">
+        <button class="footer-btn" id="create-group-btn" title="New Group">👥 New Group</button>
+        <button class="footer-btn" id="lock-btn" title="Lock">🔒</button>
+      </div>
+    </aside>
+
+    <!-- Chat Area -->
+    <main class="chat-main" id="chat-main">
+      <div class="empty-state" id="empty-state">
+        <div class="empty-icon">💬</div>
+        <h2>Drp Lan Chat</h2>
+        <p>Select a conversation to start chatting<br>or explore nearby devices to connect</p>
+      </div>
+
+      <div class="chat-view hidden" id="chat-view">
+        <div class="chat-topbar" id="chat-topbar">
+          <div class="chat-topbar-info">
+            <div class="topbar-avatar" id="topbar-avatar"></div>
+            <div class="topbar-text">
+              <div class="topbar-name" id="topbar-name"></div>
+              <div class="topbar-status" id="topbar-status"></div>
+            </div>
+          </div>
+          <div class="topbar-actions">
+            <button class="icon-btn" id="audio-call-btn" title="Audio Call" style="display:none">📞</button>
+            <button class="icon-btn" id="call-btn" title="Video Call" style="display:none">📹</button>
+            <button class="icon-btn" id="search-msg-btn" title="Search">🔍</button>
+            <button class="icon-btn chat-menu-btn" id="chat-menu-btn" title="More">⋮</button>
+          </div>
+          <div class="chat-menu-popup hidden" id="chat-menu-popup">
+            <button id="menu-view-profile">👤 View Profile</button>
+            <button id="menu-toggle-notif">🔕 Mute Notifications</button>
+            <button id="menu-download-chat">⬇ Download Chat</button>
+            <button id="menu-clear-chat">🗑 Clear Chat</button>
+            <button id="menu-remove-friend">❌ Remove Friend</button>
+          </div>
+        </div>
+
+        <!-- Select Mode Bar -->
+        <div id="select-bar" class="select-bar hidden">
+          <span id="select-count">0 selected</span>
+          <div class="select-bar-actions">
+            <button id="select-delete-btn" class="danger-btn" disabled>🗑 Delete</button>
+            <button id="select-cancel-btn" class="secondary-btn">Cancel</button>
+          </div>
+        </div>
+
+        <div class="messages-wrap" id="messages-wrap">
+          <div id="messages"></div>
+          <div id="typing-indicator" class="typing-indicator hidden">
+            <span></span><span></span><span></span>
+          </div>
+        </div>
+
+        <!-- Reply Preview -->
+        <div id="reply-preview" class="reply-preview hidden">
+          <div class="reply-text" id="reply-text"></div>
+          <button id="reply-cancel">✕</button>
+        </div>
+
+        <div class="input-bar">
+          <button class="icon-btn attach-btn" id="attach-btn" title="Send File">📎</button>
+          <div class="input-wrap">
+            <input type="text" id="msg-input" placeholder="Message..." autocomplete="off">
+            <button class="emoji-btn" id="emoji-btn">😊</button>
+          </div>
+          <button class="send-btn" id="send-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+          </button>
+        </div>
+
+        <div class="emoji-picker hidden" id="emoji-picker"></div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="renderer.js"></script>
+</body>
+</html>
